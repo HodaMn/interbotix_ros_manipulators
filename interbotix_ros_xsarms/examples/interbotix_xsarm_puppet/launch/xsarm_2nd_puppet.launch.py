@@ -214,7 +214,7 @@ def generate_launch_description():
     declared_arguments.append(
         DeclareLaunchArgument(
             'use_puppet_rviz',
-            default_value='false',
+            default_value='true',
             choices=('true', 'false'),
             description='launches RViz if set to `true`. Off by default so pair 1 keeps the window.',
         )
@@ -225,14 +225,14 @@ def generate_launch_description():
             default_value=PathJoinSubstitution([
                 FindPackageShare('interbotix_xsarm_puppet'),
                 'rviz',
-                'xsarm_puppet_two_pairs.rviz',
+                'xsarm_puppet.rviz',
             ]),
             description='file path to the config file RViz should load.',
         )
     )
     declared_arguments.append(
         DeclareLaunchArgument(
-            'tf_x_offset',
+           'tf_x_offset',
             default_value='0.6',
             description='x position of this pair in RViz, so it does not overlap pair 1.',
         )
