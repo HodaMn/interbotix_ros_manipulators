@@ -1,0 +1,11 @@
+ros2 launch interbotix_xsarm_puppet xsarm_puppet.launch.py robot_model_leader:=wx250 robot_model_follower:=vx300 use_sim:=true
+
+ros2 launch interbotix_xsarm_puppet xsarm_2nd_puppet.launch.py robot_model_leader_2:=wx250 robot_model_follower_2:=vx300 use_sim:=true 
+
+ros2 launch interbotix_xsarm_puppet puppet3.launch.py robot_model_leader:=wx250s robot_model_follower:=wx250s  robot_model_follower_2:=wx250s use_sim:=true
+
+
+
+
+
+ros2 launch interbotix_xsarm_control xsarm_control.launch.py robot_model:=wx250s robot_name:=follower_2 use_sim:=true use_rviz:=false
