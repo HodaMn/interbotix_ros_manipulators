@@ -1,31 +1,3 @@
-# Copyright 2024 Trossen Robotics
-#
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions are met:
-#
-#    * Redistributions of source code must retain the above copyright
-#      notice, this list of conditions and the following disclaimer.
-#
-#    * Redistributions in binary form must reproduce the above copyright
-#      notice, this list of conditions and the following disclaimer in the
-#      documentation and/or other materials provided with the distribution.
-#
-#    * Neither the name of the the copyright holder nor the names of its
-#      contributors may be used to endorse or promote products derived from
-#      this software without specific prior written permission.
-#
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
-# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-# POSSIBILITY OF SUCH DAMAGE.
-
 from typing import List
 
 from interbotix_xs_modules.xs_common import (
@@ -53,14 +25,15 @@ from launch_ros.substitutions import FindPackageShare
 
 
 def launch_setup(context, *args, **kwargs):
-    robot_model_leader_launch_arg = LaunchConfiguration('robot_model_leader')
-    robot_name_leader_launch_arg = LaunchConfiguration('robot_name_leader')
-    robot_model_follower_launch_arg = LaunchConfiguration('robot_model_follower')
-    robot_name_follower_launch_arg = LaunchConfiguration('robot_name_follower')
+    robot_model_leader_launch_arg = LaunchConfiguration('robot_model_leader_2')
+    robot_name_leader_launch_arg = LaunchConfiguration('robot_name_leader_2')
+    robot_model_follower_launch_arg = LaunchConfiguration('robot_model_follower_2')
+    robot_name_follower_launch_arg = LaunchConfiguration('robot_name_follower_2')
     use_puppet_rviz_launch_arg = LaunchConfiguration('use_puppet_rviz')
     launch_driver_launch_arg = LaunchConfiguration('launch_driver')
     use_sim_launch_arg = LaunchConfiguration('use_sim')
     xs_driver_logging_level_launch_arg = LaunchConfiguration('xs_driver_logging_level')
+    tf_x_offset_launch_arg = LaunchConfiguration('tf_x_offset')
 
     xsarm_control_launch_leader = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([
@@ -107,24 +80,24 @@ def launch_setup(context, *args, **kwargs):
     )
 
     xsarm_puppet_node = Node(
-        name='xsarm_puppet',
+        name='xsarm_puppet_2',
         package='interbotix_xsarm_puppet',
         executable='xsarm_puppet',
         output='screen',
         parameters=[
             {
-                'robot_name_leader': LaunchConfiguration('robot_name_leader'),
-                'robot_name_follower': LaunchConfiguration('robot_name_follower'),
+                'robot_name_leader': LaunchConfiguration('robot_name_leader_2'),
+                'robot_name_follower': LaunchConfiguration('robot_name_follower_2'),
             }
         ]
     )
 
     tf_broadcaster_leader = Node(
-        name='tf_broadcaster_leader',
+        name='tf_broadcaster_leader_2',
         package='tf2_ros',
         executable='static_transform_publisher',
         arguments=[
-            '--x', '0.0',
+            '--x', tf_x_offset_launch_arg,
             '--y', '-0.25',
             '--z', '0.0',
             '--frame-id', '/world',
@@ -133,11 +106,11 @@ def launch_setup(context, *args, **kwargs):
     )
 
     tf_broadcaster_follower = Node(
-        name='tf_broadcaster_follower',
+        name='tf_broadcaster_follower_2',
         package='tf2_ros',
         executable='static_transform_publisher',
         arguments=[
-            '--x', '0.0',
+            '--x', tf_x_offset_launch_arg,
             '--y', '0.25',
             '--z', '0.0',
             '--frame-id', '/world',
@@ -149,7 +122,7 @@ def launch_setup(context, *args, **kwargs):
         condition=IfCondition(use_puppet_rviz_launch_arg),
         package='rviz2',
         executable='rviz2',
-        name='rviz2',
+        name='rviz2_2',
         arguments=[
             '-d', LaunchConfiguration('rvizconfig'),
         ],
@@ -170,34 +143,30 @@ def generate_launch_description():
     declared_arguments: List[DeclareLaunchArgument] = []
     declared_arguments.append(
         DeclareLaunchArgument(
-            'robot_model_leader',
+            'robot_model_leader_2',
             choices=get_interbotix_xsarm_models(),
-            description='model type of the leader Interbotix Arm such as `wx200` or `rx150`.',
+            description='model type of the leader (pair 2) Interbotix Arm such as `wx200`.',
         )
     )
     declared_arguments.append(
         DeclareLaunchArgument(
-            'robot_name_leader',
-            default_value='leader',
-            description=(
-                'name of the leader robot.'
-            ),
+            'robot_name_leader_2',
+            default_value='leader_2',
+            description='name of the leader robot (pair 2).',
         )
     )
     declared_arguments.append(
         DeclareLaunchArgument(
-            'robot_model_follower',
+            'robot_model_follower_2',
             choices=get_interbotix_xsarm_models(),
-            description='model type of the follower Interbotix Arm such as `wx200` or `rx150`.',
+            description='model type of the follower (pair 2) Interbotix Arm such as `vx300`.',
         )
     )
     declared_arguments.append(
         DeclareLaunchArgument(
-            'robot_name_follower',
-            default_value='follower',
-            description=(
-                'name of the follower robot.'
-            ),
+            'robot_name_follower_2',
+            default_value='follower_2',
+            description='name of the follower robot (pair 2).',
         )
     )
     declared_arguments.append(
@@ -206,9 +175,9 @@ def generate_launch_description():
             default_value=PathJoinSubstitution([
                 FindPackageShare('interbotix_xsarm_puppet'),
                 'config',
-                'leader_modes.yaml',
+                'leader_modes_2.yaml',
             ]),
-            description="the file path to the 'mode config' YAML file for the leader arm.",
+            description="the file path to the 'mode config' YAML file for the leader arm (pair 2).",
         )
     )
     declared_arguments.append(
@@ -217,9 +186,9 @@ def generate_launch_description():
             default_value=PathJoinSubstitution([
                 FindPackageShare('interbotix_xsarm_puppet'),
                 'config',
-                'follower_modes.yaml',
+                'follower_modes_2.yaml',
             ]),
-            description="the file path to the 'mode config' YAML file for the follower arm.",
+            description="the file path to the 'mode config' YAML file for the follower arm (pair 2).",
         )
     )
     declared_arguments.append(
@@ -228,8 +197,8 @@ def generate_launch_description():
             default_value=(PathJoinSubstitution([
                 FindPackageShare('interbotix_xsarm_control'),
                 'config',
-                LaunchConfiguration('robot_model_leader')]), '.yaml'),
-            description="the file path to the 'motor config' YAML file for the leader arm.",
+                LaunchConfiguration('robot_model_leader_2')]), '.yaml'),
+            description="the file path to the 'motor config' YAML file for the leader arm (pair 2).",
         )
     )
     declared_arguments.append(
@@ -238,16 +207,16 @@ def generate_launch_description():
             default_value=(PathJoinSubstitution([
                 FindPackageShare('interbotix_xsarm_control'),
                 'config',
-                LaunchConfiguration('robot_model_follower')]), '.yaml'),
-            description="the file path to the 'motor config' YAML file for the follower arm.",
+                LaunchConfiguration('robot_model_follower_2')]), '.yaml'),
+            description="the file path to the 'motor config' YAML file for the follower arm (pair 2).",
         )
     )
     declared_arguments.append(
         DeclareLaunchArgument(
             'use_puppet_rviz',
-            default_value='true',
+            default_value='false',
             choices=('true', 'false'),
-            description='launches RViz if set to `true`.',
+            description='launches RViz if set to `true`. Off by default so pair 1 keeps the window.',
         )
     )
     declared_arguments.append(
@@ -256,9 +225,16 @@ def generate_launch_description():
             default_value=PathJoinSubstitution([
                 FindPackageShare('interbotix_xsarm_puppet'),
                 'rviz',
-                'xsarm_puppet.rviz',
+                'xsarm_puppet_two_pairs.rviz',
             ]),
             description='file path to the config file RViz should load.',
+        )
+    )
+    declared_arguments.append(
+        DeclareLaunchArgument(
+            'tf_x_offset',
+            default_value='0.6',
+            description='x position of this pair in RViz, so it does not overlap pair 1.',
         )
     )
     declared_arguments.append(
@@ -294,16 +270,16 @@ def generate_launch_description():
     declared_arguments.extend(
         declare_interbotix_xsarm_robot_description_launch_arguments(
             robot_description_launch_config_name='robot_description_leader',
-            robot_model_launch_config_name='robot_model_leader',
-            robot_name_launch_config_name='robot_name_leader',
+            robot_model_launch_config_name='robot_model_leader_2',
+            robot_name_launch_config_name='robot_name_leader_2',
             use_world_frame='false',
         )
     )
     declared_arguments.extend(
         declare_interbotix_xsarm_robot_description_launch_arguments(
             robot_description_launch_config_name='robot_description_follower',
-            robot_model_launch_config_name='robot_model_follower',
-            robot_name_launch_config_name='robot_name_follower',
+            robot_model_launch_config_name='robot_model_follower_2',
+            robot_name_launch_config_name='robot_name_follower_2',
             use_world_frame='false',
         )
     )
