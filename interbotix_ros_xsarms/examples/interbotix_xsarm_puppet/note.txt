@@ -6,6 +6,16 @@ ros2 launch interbotix_xsarm_puppet puppet3.launch.py robot_model_leader:=wx250s
 
 
 
-
-
 ros2 launch interbotix_xsarm_control xsarm_control.launch.py robot_model:=wx250s robot_name:=follower_2 use_sim:=true use_rviz:=false
+
+
+ls /dev | grep ttyDXL
+ls -l /dev/ttyUSB*
+udevadm info -a -n /dev/ttyUSB0 | grep serial
+sudo nano /etc/udev/rules.d/99-interbotix-udev.rules
+
+# Leader U2D2
+SUBSYSTEM=="tty", ATTRS{serial}=="FTA7NOU8", ATTR{device/latency_timer}="1", SYMLINK+="ttyDXL_leader"
+
+# Follower U2D2
+SUBSYSTEM=="tty", ATTRS{serial}=="FT89FLCF", ATTR{device/latency_timer}="1", SYMLINK+="ttyDXL_follower"
