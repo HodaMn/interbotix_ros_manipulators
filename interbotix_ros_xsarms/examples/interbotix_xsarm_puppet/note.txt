@@ -1,50 +1,37 @@
+Using arm-puppet launch file for one master and slave: 
 ros2 launch interbotix_xsarm_puppet xsarm_puppet.launch.py robot_model_leader:=wx250s robot_model_follower:=wx250s use_sim:=true
 
+using this launch file for 2nd master and slave: 
 ros2 launch interbotix_xsarm_puppet xsarm_2nd_puppet.launch.py robot_model_leader_2:=wx250s robot_model_follower_2:=wx250s use_sim:=true 
 
+Using the launch file for one master and 2 slaves: 
 ros2 launch interbotix_xsarm_puppet puppet3.launch.py robot_model_leader:=wx250s robot_model_follower:=wx250s  robot_model_follower_2:=wx250s use_sim:=true
 
 
-
-ros2 launch interbotix_xsarm_control xsarm_control.launch.py robot_model:=wx250s robot_name:=follower_2 use_sim:=true use_rviz:=false
-
-
+For fixing the serial number of the ports, so that the robots don’t get mixed up! 
+Connect one by one, then check if connected generally:
 ls /dev | grep ttyDXL
 ls -l /dev/ttyUSB*
-udevadm info -a -n /dev/ttyUSB0 | grep serial
+
+retrieve the serial number by: 
+udevadm info -a -n /dev/ttyUSB0 | grep serial   (for next ones would be USB1…)
+
+since we have two separate PCs (for master and slave), we will use usb 0 and 1 of both PCs
+open the file below:
 sudo nano /etc/udev/rules.d/99-interbotix-udev.rules
+
+write the leader commands in the master pc and the follower commands in the slave pc:
 
 # Leader U2D2
 SUBSYSTEM=="tty", ATTRS{serial}=="FTA7NOU8", ATTR{device/latency_timer}="1", SYMLINK+="ttyDXL_leader"
+SUBSYSTEM=="tty", ATTRS{serial}=="FTA7NNBN", ATTR{device/latency_timer}="1", SYMLINK+="ttyDXL_leader_2"
 
 # Follower U2D2
 SUBSYSTEM=="tty", ATTRS{serial}=="FT89FLCF", ATTR{device/latency_timer}="1", SYMLINK+="ttyDXL_follower"
+SUBSYSTEM=="tty", ATTRS{serial}=="FT88YSCI", ATTR{device/latency_timer}="1", SYMLINK+="ttyDXL_follower_2"
 
 
-
-Leader PC:
-ros2 launch interbotix_xsarm_control xsarm_control.launch.py robot_model:=wx250s robot_name:=leader use_rviz:=false mode_configs:=$HOME/interbotix_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/examples/interbotix_xsarm_puppet/config/leader_modes.yaml
-
-Follower PC:   Terminal 1
-ros2 launch interbotix_xsarm_control xsarm_control.launch.py robot_model:=wx250s robot_name:=follower use_rviz:=false mode_configs:=$HOME/interbotix_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/examples/interbotix_xsarm_puppet/config/follower_modes.yaml
-
-Terminal 2
-ros2 run interbotix_xsarm_puppet xsarm_puppet --ros-args -p robot_name_leader:=leader -p robot_name_follower:=follower
-
-
-
-
-at the end!! 
-
-SUBSYSTEM=="tty", ATTRS{serial}=="FTA7NOU8", ATTR{device/latency_timer}="1", SYMLINK+="ttyDXL_leader"
-SUBSYSTEM=="tty", ATTRS{serial}=="FTA7NNBN", ATTR{device/latency_timer}="1", SYMLINK+="ttyDXL_leader_2"
-
-
-SUBSYSTEM=="tty", ATTRS{serial}=="FOLLOWER_SERIAL", ATTR{device/latency_timer}="1", SYMLINK+="ttyDXL_follower"
-SUBSYSTEM=="tty", ATTRS{serial}=="FOLLOWER_2_SERIAL", ATTR{device/latency_timer}="1", SYMLINK+="ttyDXL_follower_2"
-
-
-
+After checking the ports and USBs, use these launch files in their corresponding PCs: 
 Leader PC: 
     ros2 launch interbotix_xsarm_puppet leader_pc.launch.py
     
