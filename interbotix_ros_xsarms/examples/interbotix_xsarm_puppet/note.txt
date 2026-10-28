@@ -30,3 +30,23 @@ ros2 launch interbotix_xsarm_control xsarm_control.launch.py robot_model:=wx250s
 
 Terminal 2
 ros2 run interbotix_xsarm_puppet xsarm_puppet --ros-args -p robot_name_leader:=leader -p robot_name_follower:=follower
+
+
+
+
+at the end!! 
+
+SUBSYSTEM=="tty", ATTRS{serial}=="FTA7NOU8", ATTR{device/latency_timer}="1", SYMLINK+="ttyDXL_leader"
+SUBSYSTEM=="tty", ATTRS{serial}=="FTA7NNBN", ATTR{device/latency_timer}="1", SYMLINK+="ttyDXL_leader_2"
+
+
+SUBSYSTEM=="tty", ATTRS{serial}=="FOLLOWER_SERIAL", ATTR{device/latency_timer}="1", SYMLINK+="ttyDXL_follower"
+SUBSYSTEM=="tty", ATTRS{serial}=="FOLLOWER_2_SERIAL", ATTR{device/latency_timer}="1", SYMLINK+="ttyDXL_follower_2"
+
+
+
+Leader PC: 
+    ros2 launch interbotix_xsarm_puppet leader_pc.launch.py
+    
+Follower PC: 
+    ros2 launch interbotix_xsarm_puppet follower_pc.launch.py
