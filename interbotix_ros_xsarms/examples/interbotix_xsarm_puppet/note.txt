@@ -19,3 +19,14 @@ SUBSYSTEM=="tty", ATTRS{serial}=="FTA7NOU8", ATTR{device/latency_timer}="1", SYM
 
 # Follower U2D2
 SUBSYSTEM=="tty", ATTRS{serial}=="FT89FLCF", ATTR{device/latency_timer}="1", SYMLINK+="ttyDXL_follower"
+
+
+
+Leader PC:
+ros2 launch interbotix_xsarm_control xsarm_control.launch.py robot_model:=wx250s robot_name:=leader use_rviz:=false mode_configs:=$HOME/interbotix_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/examples/interbotix_xsarm_puppet/config/leader_modes.yaml
+
+Follower PC:   Terminal 1
+ros2 launch interbotix_xsarm_control xsarm_control.launch.py robot_model:=wx250s robot_name:=follower use_rviz:=false mode_configs:=$HOME/interbotix_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/examples/interbotix_xsarm_puppet/config/follower_modes.yaml
+
+Terminal 2
+ros2 run interbotix_xsarm_puppet xsarm_puppet --ros-args -p robot_name_leader:=leader -p robot_name_follower:=follower
