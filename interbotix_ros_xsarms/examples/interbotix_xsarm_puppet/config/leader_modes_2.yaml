@@ -1,4 +1,4 @@
-port: /dev/ttyUSB2
+port: /dev/ttyDXL_leader_2
 
 groups:
   arm:
